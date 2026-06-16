@@ -1,0 +1,12 @@
+{
+    "es": {
+        "animales": ["perro", "gato", "elefante", "jirafa", "leon"],
+        "países": ["alemania", "ecuador", "argentina", "belgica", "suecia"],
+        "frutas": ["manzana", "banana", "naranja", "fresa", "piña"]
+    },
+    "en": {
+        "animals": ["dog", "cat", "elephant", "giraffe", "lion"],
+        "countries": ["germany", "ecuador", "argentina", "belgium", "sweden"],
+        "fruits": ["apple", "banana", "orange", "strawberry", "pineapple"]
+    }
+}
