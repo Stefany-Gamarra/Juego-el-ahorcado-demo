@@ -36,17 +36,21 @@ t_palabras = ("Segoe UI", 30, "bold")
 t_teclado= ("Segoe UI", 11, "bold")
 
 
-#Ventana principal que maneja el estado de configuración y del juego
+#Convertimos la ventana en una clase para poder añadir métodos
+#De ésta forma cualquier método puede acceder a self.estado por ejemplo
+#en vez de pasarlo como parámetro de función en función
 class ahorcado (tk.Tk):
     
     def __init__ (self):
         super ().__init__()
+        #Configuración báseica de la ventana
         self.title ("El ahorcado")     #Nombre de la ventana
         self.geometry ("680x780")      #Tamaño de la ventana
-        self.resizable (True, True)  
-        self.configure (bg = blanco)   #Color de ventana
+        self.resizable (False, False)  #Permiso para redimencionar
+        self.configure (bg = blanco)   #Color de fondo de la ventana
+        self.iconbitmap ("Icono_del_juego.ico")   # Ícono de la ventana
         
-        #Cargamos las palabras
+        #Cargamos las palabras 
         self.palabras = Lógica.cargar_palabras("Palabras.json")
         
         #Preparamos la configuración por defeto
@@ -57,64 +61,67 @@ class ahorcado (tk.Tk):
         self.max_intentos = 6
         
         #Estado de la partida actual
-        self.estado = None
-        self.frame_actual = None
+        self.estado = None            #Diccionario de palabra, palabras correctas, etc
+        self.frame_actual = None      #Guarda que pantallas está en funcionamiento
         
         self.pantalla_bienvenida()
     
-    #Funcion para cambiar de panatalla
+    #Funcion para cambiar de panatalla: como tkinter no tiene pantallas se crean frames
+    #Estos frames ocupan toda la ventana
+    #El sistema es: frame creado - pasar pantalla = frame destruido
     def cambiar_ventana (self, frame):
         if self.frame_actual is not None:
-            self.frame_actual.destroy ()
-        self.frame_actual = frame
-        frame.pack (fill = "both", expand = True)
+            self.frame_actual.destroy ()   #Destruye
+        self.frame_actual = frame          #Guarda act
+        frame.pack (fill = "both", expand = True)   #Agranda
     
     #Pantalla de bienvenida
     def pantalla_bienvenida (self):
-        cont = tk.Frame (self, bg = blanco)
-        tarjeta = tk.Frame (cont, bg = tar, padx = 60, pady = 45)
+        cont = tk.Frame (self, bg = blanco)  #Frame act
+        tarjeta = tk.Frame (cont, bg = tar, padx = 60, pady = 45) #Frame de adentro
         tarjeta.pack (expand = True)
         
+        #Creamos el canvas o lienzo donde va el dibujo de bienvenida
         canvas = tk.Canvas (tarjeta, width = 200, height = 210, bg = tar, highlightthickness = 0)
         canvas.pack (pady = (0, 15))
         self.dibujar_bienvenida (canvas)
         
+        #Textos de bienvenida
         tk.Label (tarjeta, text = "El Ahorcado", font = t_titulo, bg = tar, fg = c_titulo).pack ()
-        tk.Label (
-            tarjeta,
-            text = "Adivina la palabra letra por letra antes de que sea demasiado tarde",
-            font = t_subt, bg = tar, fg = c_subt, justify = "center"). pack (pady = (10, 30))
+        tk.Label (tarjeta, text = "Adivina la palabra letra por letra antes de que sea demasiado tarde",
+                  font = t_subt, bg = tar, fg = c_subt, justify = "center"). pack (pady = (10, 30))
         
-        tk.Button (
-            tarjeta,
-            text = "Jugar",
-            font = t_btn, bg = prim, fg = blanco,
-            activebackground = prim_oscuro, activeforeground = blanco,
-            relief = "flat", bd = 0, padx = 45, pady = 14, cursor = "hand2",
-            command = self.pantalla_configuracion).pack (pady = (0,20))
+        #Boton para pasar al frame de configuración
+        tk.Button (tarjeta, text = "¡Jugar!", font = t_btn, bg = prim, fg = blanco,
+                   activebackground = prim_oscuro, activeforeground = blanco,
+                   relief = "flat", bd = 0, padx = 45, pady = 14, cursor = "hand2",
+                   command = self.pantalla_configuracion).pack (pady = (0,20))
         
-        tk.Label (
-            tarjeta,
-            text = "v1.0 Hecho con Python",
-            font = ("Segoe UI", 9),
-            bg = tar, fg = c_mut).pack ()
+        #Texto en pequeño con un extra opcional, va debajo del botón
+        #el .pack define el orden de aparición
+        tk.Label (tarjeta, text = "v1.0 Hecho con Python", font = ("Segoe UI", 9),
+                  bg = tar, fg = c_mut).pack ()
         
+        #Arma el frame
         self.cambiar_ventana(cont)
     
-    #Creamos la "portada"
+    #Creamos el dibujo de la "portada"
     def dibujar_bienvenida (self, canvas):
         
         c = prim
+        #La base, el palito, la soga, el otro palito
         canvas.create_line (40, 195, 40, 20, width = 4, fill = c)
         canvas.create_line (40, 20, 120, 20, width = 4, fill = c)
         canvas.create_line (120, 20, 120, 45, width = 4, fill = c)
         canvas.create_line (10, 195, 170, 195, width = 4, fill = c)
         
+        #Creamos la cabeza, los ojitos y la sonrisa
         canvas.create_oval (100, 45, 140, 85, width = 3, fill = c)
         canvas.create_oval (108, 58, 112, 62, width = 3, fill = c)
         canvas.create_oval (128, 58, 132, 62, width = 3, fill = c)
-        canvas.create_arc (106, 58, 132, 80, start = 200, extent = 140, style = "arc", width = 3, outline = c)
+        canvas.create_arc (106, 58, 132, 80, start = 200, extent = 140, style = "arc", width = 3, outline = blanco)
         
+        #El resto del cuerpo
         canvas.create_line (120, 85, 120, 138, width = 3, fill = c)
         canvas.create_line (120, 95, 95, 120, width = 3, fill = c)
         canvas.create_line (120, 95, 145, 120, width = 3, fill = c)
@@ -123,7 +130,7 @@ class ahorcado (tk.Tk):
     
     #Pantalla de configuración
     def pantalla_configuracion (self):
-        #Creamos la ventana
+        #Creamos el frame
         cont = tk.Frame (self, bg = blanco)
         
         #Añadimos las etiquetas con el texto inicial
@@ -135,19 +142,21 @@ class ahorcado (tk.Tk):
         tarj = tk.Frame (cont, bg = tar, padx = 40, pady = 30)
         tarj.pack (padx = 40, fill = "x")
         
-        #tenía un bug debido al desorden de código, llamo pero está escrito más abajo
+        #tenía un bug debido al desorden de código, estaba escrito màs abajo, toco subirlo
         self.btns_idioma = {}
         self.btns_categoria = {}
         self.btns_dificultad = {}
         
-        #Nombre
+        #Ingreso del nombre
         tk.Label (tarj, text = "TU NOMBRE", font = t_label, bg = tar, fg = c_subt).pack (anchor = "w")
         
         self.entry_nombre = tk.Entry (tarj, font = ("Segoe UI", 12), relief = "flat", bd = 8)
         self.entry_nombre.pack (fill = "x", pady = (5, 20))
         self.entry_nombre.insert (0, self.nombre)
         
-        #Idioma
+        #Selección del idioma
+        #Cod de contención para usarlo en una función distinta debido al cambio de idioma
+        #Facilita la reconstrucción de opciones
         tk.Label (tarj, text = "IDIOMA", font = t_label, bg = tar, fg = c_subt).pack (anchor = "w")
         
         fila_idioma = tk.Frame (tarj, bg = tar)
@@ -155,16 +164,19 @@ class ahorcado (tk.Tk):
         
         self.btns_idioma = {}
         
+        #Creación de los botones con las opciones 
+        #Acomodamos los botones uno al aldo del otro
         for cod, etiqueta in [("es", "es Español"), ("en", "is English")]:
             b = tk.Button( fila_idioma, text = etiqueta, font = t_btn, relief = "flat",
                           bd = 0, padx = 20, pady = 10, cursor = "hand2", 
                           command = lambda c = cod: self.elegir_idioma (c))
-        
             b.pack (side = "left", padx = (0,10))
         
             self.btns_idioma[cod] = b
         
-        #Categoría
+        #Las categorías no se crean aca, sino en otro método
+        #Esto es debido al cambio de idioma, las categorías deben regenerarse
+        #Con ésto ya no debemos reconstruir todo el fram de configuración
         tk.Label (tarj, text = "CATEGORÍA DE PALABRAS", font = t_label,
                   bg = tar, fg = c_subt). pack (anchor = "w")
         
@@ -175,7 +187,7 @@ class ahorcado (tk.Tk):
         
         self.construir_categorias ()
         
-        #dificultad
+        #Cod de contención de la selección de dificultas
         tk.Label (tarj, text = "DIFICULTAD", font = t_label,
                   bg = tar, fg = c_subt). pack (anchor = "w")
         
@@ -184,6 +196,7 @@ class ahorcado (tk.Tk):
         
         self.btns_dificultad = {}
         
+        #Creación de los botones de dificultad 
         for clave, emoji, etiqueta, intentos in [  ("facil", "😊", "Fácil", 8),
             ("normal", "🙂", "Normal", 6),
             ("dificil", "💀", "Difícil", 4)]:
@@ -195,7 +208,8 @@ class ahorcado (tk.Tk):
             b.pack (side = "left", padx = (0, 10), fill = "x", expand = True)
             
             self.btns_dificultad [clave] = b
-            
+        
+        #Creación del botón para pasar del frame de configuración a la "pantalla" de juego
         tk.Button (cont, text = "Jugar", font = t_btn,
                        bg = prim, fg = blanco, activebackground = prim_oscuro, activeforeground = blanco,
                        relief = "flat", bd = 0, padx = 45, pady = 14, cursor = "hand2",
@@ -203,12 +217,16 @@ class ahorcado (tk.Tk):
             
         self.actualizar_estilos_config ()
         self.cambiar_ventana(cont)
-            
+     
+    #Aca se usa el cod de idioma
+    #Guarda el idioma elegido y contruye los botones de categoria
     def elegir_idioma (self, codigo):
         self.idioma = codigo
         self.construir_categorias ()
         self.actualizar_estilos_config ()
-        
+    
+    #Funcion que crea y destruye los widgets hijos del frame act si se cambia de idioma
+    #Evita la apilación de opciones
     def construir_categorias (self):
         for w in self.fila_categoria.winfo_children ():
             w.destroy ()
@@ -227,12 +245,15 @@ class ahorcado (tk.Tk):
                 ("fruits", "Fruits", "🍎")]
                 
         opciones.append(("aleatorio", "Aleatorio", "🎲"))
-            
+         
+        #Evita que al cambiar de idioma se mantenga con el valor inicial
+        #Ejemplo, seleccione animales - cambio ingles - sigue valienod animales en español
         claves_validas = [o[0] for o in opciones]
             
         if self.categoria not in claves_validas:
             self.categoria = claves_validas[0]
-            
+        
+        #Creamos los botones de las opciones
         for clave, etiqueta, emoji in opciones:
             b = tk.Button ( self.fila_categoria, text = f"{emoji}\n{etiqueta}",
                                font = t_btn, relief = "flat", bd = 0, padx = 15,
@@ -247,42 +268,35 @@ class ahorcado (tk.Tk):
     def elegir_categoria (self, clave):
         self.categoria = clave
         self.actualizar_estilos_config ()
-            
+    
+    #Guarda el num de intetnos
     def elegir_dificultad (self, clave, intentos):
         self.dificultad = clave
         self.max_intentos = intentos
         self.actualizar_estilos_config ()
             
     def actualizar_estilos_config (self):
-                
+        
+        #Recorre los botnes de idioma y les da su apariencia dependiendo de si estan
+        #seleccionados o no
         for cod, b in self.btns_idioma.items ():
             sel = cod == self.idioma
-            b.configure (
-                bg = prim if sel else "white",
-                fg = blanco if sel else c_titulo,
-                highlightbackground = prim if sel else tar_oscuro,
-                highlightthickness = 2
-                )
-                
+            b.configure (bg = prim if sel else "white", fg = blanco if sel else c_titulo,
+                highlightbackground = prim if sel else tar_oscuro, highlightthickness = 2)
+         
+        #Lo mismo con los botones de categoria
         for clave, b in self.btns_categoria.items ():
             sel = clave == self.categoria
-            b.configure (
-                bg = prim if sel else "white",
-                fg = blanco if sel else c_titulo,
-                highlightbackground = prim if sel else tar_oscuro,
-                highlightthickness = 2
-                )
-                
+            b.configure (bg = prim if sel else "white", fg = blanco if sel else c_titulo,
+                highlightbackground = prim if sel else tar_oscuro, highlightthickness = 2)
+        
+        #Lo mismo con los botones de dificultad
         for clave, b in self.btns_dificultad.items ():
             sel = clave == self.dificultad
-            b.configure (
-                bg = prim if sel else "white",
-                fg = blanco if sel else c_titulo,
-                highlightbackground = prim if sel else tar_oscuro,
-                highlightthickness = 2
-                )
+            b.configure (bg = prim if sel else "white", fg = blanco if sel else c_titulo,
+                highlightbackground = prim if sel else tar_oscuro, highlightthickness = 2)
                     
-    #toma los daros y genera una partida con la configuracion
+    #Toma el nombre para ponerlo en la ventana
     def iniciar_partida (self):
         self.nombre = self.entry_nombre.get().strip () or "Jugador"
         self.generar_partida ()
@@ -294,16 +308,17 @@ class ahorcado (tk.Tk):
         self.mostrar_juego ()
         
     
-    #pantalla de juego y resultado
+    #Pantalla de juego y resultado
     def mostrar_juego (self):
-        self.title (f"El Ahorcado - {self.nombre}")
+        self.title (f"El Ahorcado - {self.nombre}") #Añade el nombre al título de la ventana
         
+        #Nuevo frame de contención
         cont = tk.Frame (self, bg = tar)
         
         tk.Label (cont, text = "El Ahorcado", font = ("Segoe UI", 20, "bold"),
                   bg = tar, fg = c_titulo). pack (pady = (20,10))
         
-        #Dibujo del ahorcado
+        #Dibujo del ahorcado por partes
         self.zona_superior = tk.Frame (cont, bg = tar_oscuro, height=230)
         self.zona_superior. pack (fill = "x", padx = 40, pady = (0, 15))
 
@@ -316,10 +331,13 @@ class ahorcado (tk.Tk):
         self.frame_teclado = tk.Frame (cont, bg=tar)
         self.frame_teclado. pack (pady = (0, 10))
         
-        #Barra inferior con botones e info
+        #Frame de contención que crea la "barra" inferior
         barra = tk.Frame (cont, bg = tar_oscuro)
         barra.pack (fill = "x", side = "bottom")
         
+        #No se añade el texto por que se lo coloca despues de actualizar_juego 
+        #Así cambia cada vez que el estado del juego cambie
+        #Cod base de los botones de la barra inferior
         self.lbl_intentos = tk.Label (barra, font = t_label, bg = tar_oscuro, fg = c_titulo)
         self.lbl_intentos.pack (side = "left", padx = 20, pady = 15)
         
@@ -339,47 +357,59 @@ class ahorcado (tk.Tk):
                                      command = self.pantalla_configuracion)
         self.btn_config.pack (side = "right", padx = (10, 0), pady = 10)
         
+        #Orden de creción
         self.construir_teclado ()
         self.actualizar_juego ()
         self.cambiar_ventana (cont) 
-        
+    
+    #Función que crea los botones con cada letra
     def construir_teclado (self):
         for w in self.frame_teclado.winfo_children ():
             w.destroy ()
         self.botones_letras = {}
         
+        #Crea la Ñ dependiendo de la elección del idioma
         letras = list ("ABCDEFGHIJKMN")
         if self.idioma == "es":
             letras.append ("Ñ")
         letras += list ("LOPQRSTUVWXYZ")
         
         n = len (letras)
-        tam_fila = - (-n // 3)
+        tam_fila = - (-n // 3) #Truco para dividir redondeando hacia arriba
         filas = [letras[i:i + tam_fila] for i in range (0, n, tam_fila)]
         
         for fila in filas:
             fila_frame = tk.Frame (self.frame_teclado, bg = tar)
             fila_frame.pack (pady = 4)
             
+            #Creamos los botones uno por uno añadiendo su estética
             for letra in fila:
                 b = tk.Button (fila_frame, text = letra, font = t_teclado,
-                               width = 3, height = 1, relief = "flat", bd = 0,
+                               width = 5, height = 2, relief = "flat", bd = 0,
                                cursor = "hand2", bg = n_bg, fg = n_fg,
                                command = lambda l = letra: self.click_letra(l))
                 b.pack (side = "left", padx = 3)
                 
                 self.botones_letras [letra] = b
+    
+    #Función que conecta la interefaz con la lógica cuando el usuario
+    #da click en una letra       
     def click_letra (self, letra):
         if self.estado ["terminado"]:
             return
         self.estado = Lógica.adivinar_letra(self.estado, letra)
         self.actualizar_juego ()
     
+    #Función que re hace todo, se llama cada vez que algo cambia
+    #esto incluye: letra clickeada, cada intento, etc.
     def actualizar_juego (self):
         estado = self.estado
         
+        #Da una lista con las letras correctas, la convierte en str manteniedo los espacios con _
+        #Cambia el texto al widget 
         self.lbl_palabra.configure (text = " ".join (Lógica.letras_correctas_visibles(estado)))
         
+        #Muestra las letras incorrectas
         if estado ["letras_incorrectas"]:
             texto = "Letras incorrectas: " + ", ".join (sorted (estado ["letras_incorrectas"]))
         else:
@@ -387,8 +417,11 @@ class ahorcado (tk.Tk):
             
         self.lbl_incorrectas.configure (text = texto)
         
+        #Muestra los intentos restantes, actualizandose con cada click
         self.lbl_intentos.configure (text = f"Intentos restantes: {estado['intentos_restantes']}")
         
+        #Cambia el color de cada boton dependiedo de si es letra correcta o incorrecta
+        #revisando si se encuntra dentro de la lista lestras_correctas o letras_incorrectas
         for letra, b in self.botones_letras.items ():
             if letra in estado ["letras_correctas"]:
                 b.configure (bg = c_bg, fg = c_fg, state = "disabled")
@@ -475,16 +508,16 @@ class ahorcado (tk.Tk):
     def abrir_adivinar(self):
         modal = tk.Toplevel(self)
         modal.title("")
-        modal.configure(bg="white")
+        modal.configure(bg=tar)
         modal.geometry("380x230")
         modal.resizable(False, False)
         modal.transient(self)
         modal.grab_set()
  
         tk.Label (modal, text = "Adivinar palabra", font=("Segoe UI", 16, "bold"),
-                 bg="white", fg = c_titulo).pack(pady=(20, 5))
+                 bg=tar, fg = c_titulo).pack(pady=(20, 5))
         tk.Label (modal, text= "Si fallas, perderás la partida.", font=t_subt ,
-                 bg="white", fg = c_subt).pack()
+                 bg=tar, fg = c_subt).pack()
  
         entry = tk.Entry(modal, font=("Segoe UI", 12), justify="center", relief="flat", bd=8)
         entry.pack(pady=20, padx=40, fill="x")

@@ -3,14 +3,6 @@ import json
 #Importamos la librería random (integrada en python)
 import random
 
-"""
-1. En adivinar_letra: agregué verificar_fin(estado) también cuando la letra es correcta. 
-En tu versión original solo se verificaba el fin cuando fallabas — pero si aciertas la última letra que faltaba, 
-también hay que detectar que ganaste ahí mismo.
-2. En adivinar_palabra (cuando falla): decidí que fallar la palabra completa también reste un 
-intento y pase por verificar_fin, en vez de terminar el juego automáticamente. Esto hace que sea consistente 
-con el mensaje de tu imagen 4 ("Si fallas, perderás un intento"), en lugar de perder de inmediato.
-"""
 
 #Cargar las palabras
 def cargar_palabras (ruta = "Palabras.json"):
