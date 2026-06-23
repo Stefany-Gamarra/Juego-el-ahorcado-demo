@@ -3,10 +3,17 @@ import json
 #Importamos la librería random (integrada en python)
 import random
 
-#No está completo
+"""
+1. En adivinar_letra: agregué verificar_fin(estado) también cuando la letra es correcta. 
+En tu versión original solo se verificaba el fin cuando fallabas — pero si aciertas la última letra que faltaba, 
+también hay que detectar que ganaste ahí mismo.
+2. En adivinar_palabra (cuando falla): decidí que fallar la palabra completa también reste un 
+intento y pase por verificar_fin, en vez de terminar el juego automáticamente. Esto hace que sea consistente 
+con el mensaje de tu imagen 4 ("Si fallas, perderás un intento"), en lugar de perder de inmediato.
+"""
 
 #Cargar las palabras
-def cargar_palabras (ruta = "palabras.json"):
+def cargar_palabras (ruta = "Palabras.json"):
     with open (ruta, encoding = "utf-8") as f:
         return json.load(f)
     
@@ -44,8 +51,7 @@ def nuevo_juego (palabra, max_intentos):
 
 
 #Funcion parea adivinar letra por letra
-#Aún en contrucción por falta de pruebas
-def adivinar_letra (estado, letra):
+def adivinar_letra (estado, letra): 
     
     #Recibe el estado y una letra
     letra = letra.upper()
@@ -58,6 +64,7 @@ def adivinar_letra (estado, letra):
     #Si la letra está en palabra lo añade a palabras_corrctas, sino a palabras incorrectas y resta un intento
     if letra in estado ["palabra"]:
         estado ["letras_correctas"].add(letra)
+        verificar_fin (estado)
     else:
         estado ["letras_incorrectas"].add(letra)
         estado ["intentos_restantes"] -= 1
@@ -68,7 +75,6 @@ def adivinar_letra (estado, letra):
 
 
 #Función para adivinar la palabra completa
-#Falta comprobar que funcione
 def adivinar_palabra(estado, intento):
     if estado["terminado"]:
         return estado
@@ -79,7 +85,7 @@ def adivinar_palabra(estado, intento):
         estado ["terminado"] = True
         estado ["gano"] = True
     else:
-        estado ["terminado"] -= True
+        estado ["terminado"] = True
         estado ["gano"] = False        
         
     return estado
