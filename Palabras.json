@@ -1,12 +1,12 @@
 {
     "es": {
-        "animales": ["perro", "gato", "elefante", "jirafa", "leon"],
-        "países": ["alemania", "ecuador", "argentina", "belgica", "suecia"],
-        "frutas": ["manzana", "banana", "naranja", "fresa", "piña"]
+        "animales": ["perro", "gato", "elefante", "jirafa", "leon", "oso", "vaca", "cocodrilo", "pajaro", "serpiente"],
+        "países": ["alemania", "ecuador", "argentina", "belgica", "suecia", "lisboa", "seul", "tokio", "pekin"],
+        "frutas": ["manzana", "banana", "naranja", "fresa", "piña", "sandia", "durazno", "ciruela", "arandano"]
     },
     "en": {
-        "animals": ["dog", "cat", "elephant", "giraffe", "lion"],
-        "countries": ["germany", "ecuador", "argentina", "belgium", "sweden"],
-        "fruits": ["apple", "banana", "orange", "strawberry", "pineapple"]
+        "animals": ["dog", "cat", "elephant", "giraffe", "lion", "bear", "cow", "cocodile", "bird", "snake"],
+        "countries": ["germany", "ecuador", "argentina", "belgium", "sweden", "lisbon", "seoul", "tokyo", "beijing"],
+        "fruits": ["apple", "banana", "orange", "strawberry", "pineapple", "watermelon", "peach", "plum", "blueberry"]
     }
 }

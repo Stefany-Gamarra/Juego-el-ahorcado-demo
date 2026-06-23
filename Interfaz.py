@@ -422,6 +422,7 @@ class ahorcado (tk.Tk):
         
         #Cambia el color de cada boton dependiedo de si es letra correcta o incorrecta
         #revisando si se encuntra dentro de la lista lestras_correctas o letras_incorrectas
+        #Desactiva si la letra ya fue clickeada
         for letra, b in self.botones_letras.items ():
             if letra in estado ["letras_correctas"]:
                 b.configure (bg = c_bg, fg = c_fg, state = "disabled")
@@ -434,6 +435,7 @@ class ahorcado (tk.Tk):
         for w in self.zona_superior.winfo_children ():
             w.destroy ()
         
+        #Muestra el resultado de la partida en una caja
         if estado ["terminado"]:
             self.mostrar_resultado ()
             self.btn_adivinar.pack_forget ()
@@ -441,7 +443,6 @@ class ahorcado (tk.Tk):
             errores = len (estado ["letras_incorrectas"])
             canvas = tk.Canvas (self.zona_superior, width = 700, height = 230,
                                 bg = tar_oscuro, highlightthickness = 0)
-            
             canvas.pack ()
             
             self.dibujar_ahorcado (canvas, errores, estado ["max_intentos"])
@@ -481,67 +482,73 @@ class ahorcado (tk.Tk):
         cx, cy = 350, 115
     
         #La horca siempre visible
-        canvas.create_line(cx - 80, cy + 95, cx - 80, cy - 95, width=4, fill=c)
-        canvas.create_line(cx - 80, cy - 95, cx, cy - 95, width=4, fill=c)
-        canvas.create_line(cx, cy - 95, cx, cy - 65, width=4, fill=c)
-        canvas.create_line(cx - 110, cy + 95, cx + 50, cy + 95, width=4, fill=c)
+        canvas.create_line (cx - 80, cy + 95, cx - 80, cy - 95, width = 4, fill = c)
+        canvas.create_line (cx - 80, cy - 95, cx, cy - 95, width = 4, fill = c)
+        canvas.create_line (cx, cy - 95, cx, cy - 65, width = 4, fill = c)
+        canvas.create_line (cx - 110, cy + 95, cx + 50, cy + 95, width = 4, fill = c)
         
+        #Hace que el dibujo funcione igual si es 8, 6 o 4 intentos
         partes_totales = 6
-        
         proporcion = errores / max_intentos if max_intentos else 0
         partes = min (partes_totales, round (proporcion * partes_totales))
         
         if partes >= 1:  # Cabeza
-           canvas.create_oval(cx - 20, cy - 65, cx + 20, cy - 25, width=3, outline=c)
+           canvas.create_oval (cx - 20, cy - 65, cx + 20, cy - 25, width = 3, outline = c)
         if partes >= 2:  # Cuerpo
-           canvas.create_line(cx, cy - 25, cx, cy + 30, width=3, fill=c)
+           canvas.create_line (cx, cy - 25, cx, cy + 30, width = 3, fill = c)
         if partes >= 3:  # Brazo izquierdo
-           canvas.create_line(cx, cy - 15, cx - 25, cy + 10, width=3, fill=c)
+           canvas.create_line (cx, cy - 15, cx - 25, cy + 10, width = 3, fill = c)
         if partes >= 4:  # Brazo derecho
-           canvas.create_line(cx, cy - 15, cx + 25, cy + 10, width=3, fill=c)
+           canvas.create_line (cx, cy - 15, cx + 25, cy + 10, width = 3, fill = c)
         if partes >= 5:  # Pierna izquierda
-           canvas.create_line(cx, cy + 30, cx - 20, cy + 65, width=3, fill=c)
+           canvas.create_line (cx, cy + 30, cx - 20, cy + 65, width = 3, fill = c)
         if partes >= 6:  # Pierna derecha
-           canvas.create_line(cx, cy + 30, cx + 20, cy + 65, width=3, fill=c)
+           canvas.create_line (cx, cy + 30, cx + 20, cy + 65, width = 3, fill = c)
     
     #Adivinar palabra completa
-    def abrir_adivinar(self):
-        modal = tk.Toplevel(self)
-        modal.title("")
-        modal.configure(bg=tar)
-        modal.geometry("380x230")
-        modal.resizable(False, False)
-        modal.transient(self)
-        modal.grab_set()
- 
+    #Creamos una nueva ventana independiente 
+    def abrir_adivinar (self):
+        modal = tk.Toplevel (self)
+        modal.title ("")
+        modal.configure (bg=tar)
+        modal.geometry ("380x230")
+        modal.resizable (False, False)
+        modal.transient (self)
+        modal.grab_set ()
+        modal.iconbitmap ("Icono_del_juego.ico")
+        
+        #Frame que contiene los elementos
         tk.Label (modal, text = "Adivinar palabra", font=("Segoe UI", 16, "bold"),
-                 bg=tar, fg = c_titulo).pack(pady=(20, 5))
-        tk.Label (modal, text= "Si fallas, perderás la partida.", font=t_subt ,
-                 bg=tar, fg = c_subt).pack()
+                 bg = tar, fg = c_titulo).pack (pady = (20, 5))
+        tk.Label (modal, text= "Si fallas, perderás la partida.", font=t_subt,
+                 bg = tar, fg = c_subt).pack ()
+        
+        #Entrada de texto
+        entry = tk.Entry (modal, font = ("Segoe UI", 12), justify = "center", relief = "flat", bd = 8)
+        entry.pack (pady = 20, padx = 40, fill = "x")
+        entry.focus_set ()
  
-        entry = tk.Entry(modal, font=("Segoe UI", 12), justify="center", relief="flat", bd=8)
-        entry.pack(pady=20, padx=40, fill="x")
-        entry.focus_set()
- 
-        botones = tk.Frame(modal, bg="white")
-        botones.pack(pady=(0, 10))
- 
-        def confirmar():
-            intento = entry.get().strip()
+        botones = tk.Frame (modal, bg = "white")
+        botones.pack (pady=(0, 10))
+        
+        def confirmar ():
+            intento = entry.get ().strip ()
             if intento:
-                self.estado = Lógica.adivinar_palabra(self.estado, intento)
-                self.actualizar_juego()
-            modal.destroy()
- 
-        tk.Button(botones, text="Cancelar", font= t_btn , bg="white", fg= c_titulo ,
-                  relief="flat", bd=1, padx=20, pady=8, cursor="hand2",
-                  command=modal.destroy).pack(side="left", padx=10)
-        tk.Button(botones, text="Confirmar", font= t_btn , bg= prim_oscuro , fg="white",
-                  relief="flat", bd=0, padx=20, pady=8, cursor="hand2",
-                  command=confirmar).pack(side="left", padx=10)
- 
-        entry.bind("<Return>", lambda e: confirmar())
+                self.estado = Lógica.adivinar_palabra (self.estado, intento)
+                self.actualizar_juego ()
+            modal.destroy ()
+        
+        #Botones para la nueva ventana
+        tk.Button(botones, text = "Cancelar", font = t_btn , bg = "white", fg = c_titulo ,
+                  relief = "flat", bd = 1, padx = 20, pady = 8, cursor = "hand2",
+                  command = modal.destroy).pack(side = "left", padx = 10)
+        tk.Button(botones, text = "Confirmar", font = t_btn , bg = prim_oscuro , fg = "white",
+                  relief="flat", bd = 0, padx = 20, pady = 8, cursor = "hand2",
+                  command = confirmar).pack(side = "left", padx = 10)
+        
+        #Conecta un evento del teclado/mouse a una funcion, es la tecla enter
+        entry.bind ("<Return>", lambda e: confirmar ())
 
 if __name__ == "__main__":
-    app = ahorcado()
-    app.mainloop()
+    app = ahorcado ()  #Crea la ventana
+    app.mainloop ()   #Mantiene en loop la ventana
