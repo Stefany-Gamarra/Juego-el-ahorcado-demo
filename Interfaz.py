@@ -37,13 +37,13 @@ t_teclado= ("Segoe UI", 11, "bold")
 
 
 #Convertimos la ventana en una clase para poder añadir métodos
-#De ésta forma cualquier método puede acceder a self.estado por ejemplo
+#De ésta forma cualquier método puede acceder a por ejemplo self.estado 
 #en vez de pasarlo como parámetro de función en función
 class ahorcado (tk.Tk):
     
     def __init__ (self):
         super ().__init__()
-        #Configuración báseica de la ventana
+        #Configuración básica de la ventana
         self.title ("El ahorcado")     #Nombre de la ventana
         self.geometry ("680x780")      #Tamaño de la ventana
         self.resizable (False, False)  #Permiso para redimencionar
@@ -77,7 +77,7 @@ class ahorcado (tk.Tk):
     
     #Pantalla de bienvenida
     def pantalla_bienvenida (self):
-        cont = tk.Frame (self, bg = blanco)  #Frame act
+        cont = tk.Frame (self, bg = blanco)  
         tarjeta = tk.Frame (cont, bg = tar, padx = 60, pady = 45) #Frame de adentro
         tarjeta.pack (expand = True)
         
@@ -142,11 +142,6 @@ class ahorcado (tk.Tk):
         tarj = tk.Frame (cont, bg = tar, padx = 40, pady = 30)
         tarj.pack (padx = 40, fill = "x")
         
-        #tenía un bug debido al desorden de código, estaba escrito màs abajo, toco subirlo
-        self.btns_idioma = {}
-        self.btns_categoria = {}
-        self.btns_dificultad = {}
-        
         #Ingreso del nombre
         tk.Label (tarj, text = "TU NOMBRE", font = t_label, bg = tar, fg = c_subt).pack (anchor = "w")
         
@@ -154,19 +149,20 @@ class ahorcado (tk.Tk):
         self.entry_nombre.pack (fill = "x", pady = (5, 20))
         self.entry_nombre.insert (0, self.nombre)
         
-        #Selección del idioma
-        #Cod de contención para usarlo en una función distinta debido al cambio de idioma
-        #Facilita la reconstrucción de opciones
+        #Inicializa diccionarios para los botones
+        self.btns_idioma = {}
+        self.btns_categoria = {}
+        self.btns_dificultad = {}
+        
+        #Frame de contención de la selección de idioma
         tk.Label (tarj, text = "IDIOMA", font = t_label, bg = tar, fg = c_subt).pack (anchor = "w")
         
         fila_idioma = tk.Frame (tarj, bg = tar)
         fila_idioma.pack (fill = "x", pady = (5, 20))
         
-        self.btns_idioma = {}
-        
-        #Creación de los botones con las opciones 
+        #Creación de los botones con las opciones de idioma
         #Acomodamos los botones uno al aldo del otro
-        for cod, etiqueta in [("es", "es Español"), ("en", "is English")]:
+        for cod, etiqueta in [("es", "Español"), ("en", "English")]:
             b = tk.Button( fila_idioma, text = etiqueta, font = t_btn, relief = "flat",
                           bd = 0, padx = 20, pady = 10, cursor = "hand2", 
                           command = lambda c = cod: self.elegir_idioma (c))
@@ -174,27 +170,23 @@ class ahorcado (tk.Tk):
         
             self.btns_idioma[cod] = b
         
-        #Las categorías no se crean aca, sino en otro método
-        #Esto es debido al cambio de idioma, las categorías deben regenerarse
-        #Con ésto ya no debemos reconstruir todo el fram de configuración
+        #Cod del frame de contensión de los botones de categoría
         tk.Label (tarj, text = "CATEGORÍA DE PALABRAS", font = t_label,
                   bg = tar, fg = c_subt). pack (anchor = "w")
         
         self.fila_categoria = tk.Frame (tarj, bg = tar)
         self.fila_categoria.pack (fill = "x", pady = (5, 20))
         
-        self.btns_categoria = {}
         
         self.construir_categorias ()
         
-        #Cod de contención de la selección de dificultas
+        #Cod del frame de contención de la selección de dificultas
         tk.Label (tarj, text = "DIFICULTAD", font = t_label,
                   bg = tar, fg = c_subt). pack (anchor = "w")
         
         fila_dif = tk.Frame (tarj, bg = tar)
         fila_dif.pack (fill = "x", pady = (5, 0))
         
-        self.btns_dificultad = {}
         
         #Creación de los botones de dificultad 
         for clave, emoji, etiqueta, intentos in [  ("facil", "😊", "Fácil", 8),
@@ -247,7 +239,7 @@ class ahorcado (tk.Tk):
         opciones.append(("aleatorio", "Aleatorio", "🎲"))
          
         #Evita que al cambiar de idioma se mantenga con el valor inicial
-        #Ejemplo, seleccione animales - cambio ingles - sigue valienod animales en español
+        #Ejemplo, seleccione animales - cambio ingles - sigue valiendo animales en español
         claves_validas = [o[0] for o in opciones]
             
         if self.categoria not in claves_validas:
@@ -278,7 +270,7 @@ class ahorcado (tk.Tk):
     def actualizar_estilos_config (self):
         
         #Recorre los botnes de idioma y les da su apariencia dependiendo de si estan
-        #seleccionados o no
+        #seleccionados o no, es decir, les cambia el color a los seleccionados
         for cod, b in self.btns_idioma.items ():
             sel = cod == self.idioma
             b.configure (bg = prim if sel else "white", fg = blanco if sel else c_titulo,
@@ -301,7 +293,7 @@ class ahorcado (tk.Tk):
         self.nombre = self.entry_nombre.get().strip () or "Jugador"
         self.generar_partida ()
             
-    #Genera una palabra nueva y reinicia estado manteniendo la configuracion actual
+    #Elige una palabra nueva y reinicia estado manteniendo la configuracion actual
     def generar_partida (self):
         palabra = Lógica.elegir_palabra(self.palabras, self.idioma, self.categoria)
         self.estado = Lógica.nuevo_juego (palabra, self.max_intentos)
@@ -318,26 +310,28 @@ class ahorcado (tk.Tk):
         tk.Label (cont, text = "El Ahorcado", font = ("Segoe UI", 20, "bold"),
                   bg = tar, fg = c_titulo). pack (pady = (20,10))
         
-        #Dibujo del ahorcado por partes
+        #Frame superior que contendrá el dibujo o avisos de ganar y perder
         self.zona_superior = tk.Frame (cont, bg = tar_oscuro, height=230)
         self.zona_superior. pack (fill = "x", padx = 40, pady = (0, 15))
 
+        #Crea el texto grande donde se va a mostrar la palabra con guiones
+        #No tiene "text = " por que se lo coloca la fun: actualizar_juego
         self.lbl_palabra = tk.Label(cont, font = t_palabras, bg = tar, fg = c_titulo)
         self.lbl_palabra. pack (pady = (5, 5))
-
+        
+        #Crea la etiqueta que muestra las letras incorrectas
         self.lbl_incorrectas = tk.Label (cont, font = t_subt, bg = tar, fg = i_fg)
         self.lbl_incorrectas. pack (pady = (0, 15))
-
+        
+        #Frame que contendrá el teclado digital
         self.frame_teclado = tk.Frame (cont, bg=tar)
         self.frame_teclado. pack (pady = (0, 10))
         
         #Frame de contención que crea la "barra" inferior
         barra = tk.Frame (cont, bg = tar_oscuro)
         barra.pack (fill = "x", side = "bottom")
-        
-        #No se añade el texto por que se lo coloca despues de actualizar_juego 
-        #Así cambia cada vez que el estado del juego cambie
-        #Cod base de los botones de la barra inferior
+         
+        #Cod de los botones de la barra inferior
         self.lbl_intentos = tk.Label (barra, font = t_label, bg = tar_oscuro, fg = c_titulo)
         self.lbl_intentos.pack (side = "left", padx = 20, pady = 15)
         
@@ -369,10 +363,10 @@ class ahorcado (tk.Tk):
         self.botones_letras = {}
         
         #Crea la Ñ dependiendo de la elección del idioma
-        letras = list ("ABCDEFGHIJKMN")
+        letras = list ("ABCDEFGHIJKMNL")
         if self.idioma == "es":
             letras.append ("Ñ")
-        letras += list ("LOPQRSTUVWXYZ")
+        letras += list ("OPQRSTUVWXYZ")
         
         n = len (letras)
         tam_fila = - (-n // 3) #Truco para dividir redondeando hacia arriba
@@ -435,7 +429,8 @@ class ahorcado (tk.Tk):
         for w in self.zona_superior.winfo_children ():
             w.destroy ()
         
-        #Muestra el resultado de la partida en una caja
+        #Decide qué va dentro del Frame superior en cada momento
+        # o el muñequito del ahorcado, o el resultado final, nunca los dos juntos.
         if estado ["terminado"]:
             self.mostrar_resultado ()
             self.btn_adivinar.pack_forget ()
@@ -445,8 +440,11 @@ class ahorcado (tk.Tk):
                                 bg = tar_oscuro, highlightthickness = 0)
             canvas.pack ()
             
+            #Le pasa ese canvas a la función que sabe dibujar
+            #junto con cuántos errores hay y cuál es el máximo de intentos 
             self.dibujar_ahorcado (canvas, errores, estado ["max_intentos"])
             
+            #winfo_ismapped() pregunta si el botón está visible
             if not self.btn_adivinar.winfo_ismapped ():
                 self.btn_adivinar.pack (side = "right", padx = (10, 10), pady = 10)
         
